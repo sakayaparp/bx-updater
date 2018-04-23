@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Bx Updater</title>
+    <style>
+      body {
+        display: block;
+        position: relative;
+      }
+
+      body::after {
+        content: "";
+        background-image: url('./images/btc.png');
+        background-size: 100px 100px;
+        opacity: 0.2;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        position: absolute;
+        z-index: -1;   
+      }
+      table {
+        font-weight: bold;
+        background-color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Bx Updater</h1>
+    <span id="now"></span>
+    <table border="1" cellspacing="0" cellpadding="3">
+      <thead>
+        <tr>
+          <td>Coin</td>
+          <td>Price</td>
+          <td>Change +/-</td>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </body>
+
+  
+  <script>
+    // You can also require other files to run in this process
+    require('./renderer.js')
+  </script>
+  <script>
+    document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' || event.keyCode === 27) {
+            window.close();
+        }
+    });
+    
+    var d = new Date();
+    var nowEle = document.getElementById('now');
+    nowEle.append(d);
+    fetch('https://bx.in.th/api/?date=' + d).then(function(response) {
+      var items = response.json();
+      items.then((resp) => {
+        var table = document.getElementById("tableBody");
+        for(var prop in resp) {
+          if(resp[prop].primary_currency == 'THB') {
+            var row = table.insertRow(-1);
+            var cell1 = row.insertCell(0);
+            var cell2 = row.insertCell(1);
+            var cell3 = row.insertCell(2);
+            var color = 'blue';
+            if(resp[prop].change > 0) {
+              color = 'green';
+            } else if(resp[prop].change < 0) {
+              color = 'red';
+            }
+            cell1.innerHTML = resp[prop].secondary_currency;
+            cell2.innerHTML = '<font color="' + color + '">' + resp[prop].last_price.toLocaleString('en') + '</font>';
+            cell3.innerHTML = '<font color="' + color + '">' + resp[prop].change + '%</font>';
+          }
+        }
+        setTimeout(function(){
+         window.location.reload(1);
+        }, 20000);
+      });
+    })
+  </script>
+</html>
